@@ -4,11 +4,169 @@
   <meta charset="UTF-8">
   <title>Spotify Playlists</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 2em; }
-    h2 { color: #1DB954; }
-    ul { list-style-type: none; padding: 0; }
-    li { margin-bottom: 0.5em; }
-    .login-btn { background: #1DB954; color: white; padding: 10px 20px; border: none; border-radius: 20px; cursor: pointer; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #191414 0%, #1DB954 100%);
+      margin: 0;
+      min-height: 100vh;
+      color: #fff;
+    }
+    h2 {
+      color: #1DB954;
+      margin-top: 2em;
+      letter-spacing: 1px;
+    }
+    .login-btn {
+      background: #1DB954;
+      color: white;
+      padding: 12px 28px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 1.1em;
+      margin-bottom: 2em;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transition: background 0.2s;
+    }
+    .login-btn:hover {
+      background: #17a74a;
+    }
+    #custom-playlist-id {
+      border-radius: 20px;
+      border: none;
+      padding: 10px 16px;
+      font-size: 1em;
+      margin-right: 8px;
+      outline: none;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    #load-playlist-btn {
+      background: #fff;
+      color: #1DB954;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    #load-playlist-btn:hover {
+      background: #1DB954;
+      color: #fff;
+    }
+    ul#playlists {
+      padding: 0;
+      margin: 0 auto;
+      max-width: 600px;
+    }
+    ul#playlists > li {
+      background: rgba(34,34,34,0.95);
+      border-radius: 18px;
+      margin-bottom: 2em;
+      padding: 1.5em 2em 1em 2em;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+      list-style: none;
+      position: relative;
+      transition: box-shadow 0.2s;
+    }
+    ul#playlists > li:hover {
+      box-shadow: 0 8px 32px rgba(0,0,0,0.28);
+    }
+    ul#playlists a {
+      color: #1DB954;
+      font-weight: bold;
+      text-decoration: none;
+      font-size: 1.2em;
+      margin-right: 10px;
+    }
+    ul#playlists a:hover {
+      text-decoration: underline;
+    }
+    ul#playlists button {
+      background: #282828;
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      padding: 6px 16px;
+      margin: 0 4px 4px 0;
+      font-size: 0.98em;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    ul#playlists button:hover {
+      background: #1DB954;
+      color: #fff;
+    }
+    ul#playlists ul {
+      margin: 1em 0 0 0;
+      padding-left: 0;
+    }
+    ul#playlists ul li {
+      background: rgba(40,40,40,0.95);
+      border-radius: 12px;
+      margin-bottom: 0.5em;
+      padding: 0.7em 1em;
+      list-style: none;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    ul#playlists ul li button {
+      padding: 4px 12px;
+      font-size: 0.95em;
+    }
+    #copy-prompt {
+      /* Prompt styling is set in JS, but add fallback here */
+      display: none;
+    }
+    /* Add Song UI */
+    [id^='addsongui-'] {
+      margin-top: 1em;
+      margin-bottom: 0.5em;
+    }
+    [id^='addsongui-'] input[type='text'] {
+      border-radius: 14px;
+      border: none;
+      padding: 7px 12px;
+      font-size: 1em;
+      margin-right: 6px;
+      outline: none;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    [id^='addsongui-'] button {
+      background: #1DB954;
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 6px 14px;
+      font-size: 0.98em;
+      cursor: pointer;
+      margin-bottom: 4px;
+      transition: background 0.2s;
+    }
+    [id^='addsongui-'] button:hover {
+      background: #17a74a;
+    }
+    [id^='addsongui-'] ul {
+      margin: 0.5em 0 0 0;
+      padding-left: 0;
+    }
+    [id^='addsongui-'] ul li {
+      background: rgba(34,34,34,0.85);
+      border-radius: 10px;
+      margin-bottom: 0.3em;
+      padding: 0.5em 0.8em;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    @media (max-width: 700px) {
+      ul#playlists > li {
+        padding: 1em 0.5em 1em 0.5em;
+      }
+    }
   </style>
 </head>
 <body>
