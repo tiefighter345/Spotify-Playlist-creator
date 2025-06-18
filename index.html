@@ -67,7 +67,7 @@
 
     async function exchangeToken(code) {
       const codeVerifier = localStorage.getItem('spotify_code_verifier');
-      const res = await fetch('http://localhost:3000/exchange_token', {
+      const res = await fetch('http://Spotify-Playlist-creator.onrender.com/exchange_token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
