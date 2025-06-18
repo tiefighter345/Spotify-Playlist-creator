@@ -112,8 +112,11 @@
             li.innerHTML = `${idx + 1}. <a href="${playlist.external_urls.spotify}" target="_blank">${playlist.name}</a> ` +
               `<button onclick=\"navigator.clipboard.writeText('${playlist.external_urls.spotify}')\">Share</button> ` +
               `<button onclick=\"editPlaylist('${playlist.id}', '${playlist.name.replace(/'/g, "&#39;")}')\">Edit</button> ` +
-              `<button onclick=\"toggleTracks('${playlist.id}', this)\">Show Tracks</button> ` +
-              `<button onclick=\"addTrackPrompt('${playlist.id}')\">Add Song</button>`;
+              `<button onclick=\"toggleTracks('${playlist.id}', this)\">Show Tracks</button>`;
+            // Add Song UI
+            const addDiv = document.createElement('div');
+            addDiv.innerHTML = `<input type='text' placeholder='Search for a song...' id='search-${playlist.id}' style='margin-top:5px;'> <button onclick=\"searchAndShowTracks('${playlist.id}')\">Search</button><ul id='results-${playlist.id}'></ul>`;
+            li.appendChild(addDiv);
             const tracksUl = document.createElement('ul');
             tracksUl.id = `tracks-${playlist.id}`;
             tracksUl.style.display = 'none';
@@ -198,28 +201,36 @@
         }
       });
     }
-    // Add a track to a playlist (prompt for search, then add first result)
-    async function addTrackPrompt(playlistId) {
-      const query = prompt('Enter song name or artist:');
+    // Search and show tracks for adding
+    async function searchAndShowTracks(playlistId) {
+      const query = document.getElementById(`search-${playlistId}`).value;
       if (!query) return;
       const token = localStorage.getItem('spotify_access_token');
-      const search = await fetchSpotify(`search?q=${encodeURIComponent(query)}&type=track&limit=1`, token);
-      if (search.tracks.items.length === 0) {
-        alert('No track found.');
-        return;
-      }
-      const track = search.tracks.items[0];
+      const search = await fetchSpotify(`search?q=${encodeURIComponent(query)}&type=track&limit=5`, token);
+      const resultsUl = document.getElementById(`results-${playlistId}`);
+      resultsUl.innerHTML = '';
+      search.tracks.items.forEach(track => {
+        const li = document.createElement('li');
+        li.innerHTML = `${track.name} by ${track.artists.map(a => a.name).join(', ')} <button onclick=\"addTrackToPlaylist('${playlistId}', '${track.uri}')\">Add</button>`;
+        resultsUl.appendChild(li);
+      });
+    }
+    // Add a track to a playlist (from search results)
+    async function addTrackToPlaylist(playlistId, trackUri) {
+      const token = localStorage.getItem('spotify_access_token');
       const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer ' + token,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ uris: [track.uri] })
+        body: JSON.stringify({ uris: [trackUri] })
       });
       if (res.ok) {
         alert('Track added!');
-        toggleTracks(playlistId, document.querySelector(`button[onclick*="toggleTracks('${playlistId}'"]`));
+        // Optionally refresh tracks if visible
+        const btn = document.querySelector(`button[onclick*=\\"toggleTracks('${playlistId}'\\"]`);
+        if (btn && btn.textContent === 'Hide Tracks') toggleTracks(playlistId, btn);
       } else {
         alert('Failed to add track.');
       }
