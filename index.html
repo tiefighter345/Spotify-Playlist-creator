@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Spotify Top Tracks & Playlists</title>
+  <title>Spotify Playlists</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 2em; }
     h2 { color: #1DB954; }
@@ -13,15 +13,13 @@
 </head>
 <body>
   <button class="login-btn" id="login-btn">Login with Spotify</button>
-  <h2>Spotify Top Tracks</h2>
-  <ul id="tracks"></ul>
   <h2>Your Spotify Playlists</h2>
   <ul id="playlists"></ul>
 
   <script>
     const clientId = '62fe71b84f0442dbbe8f79a7c8a7150f';
     const redirectUri = 'https://tiefighter345.github.io/Spotify-Playlist-creator/index.html';
-    const scopes = 'playlist-read-private';
+    const scopes = 'playlist-read-private playlist-modify-public playlist-modify-private';
 
     // PKCE helpers
     function generateCodeVerifier(length = 128) {
@@ -101,28 +99,43 @@
       // Optionally, you can store the access token in localStorage for later use
       if (accessToken) {
         document.getElementById('login-btn').style.display = 'none';
-        // Fetch top tracks
-        const tracksData = await fetchSpotify('me/top/tracks?limit=10&time_range=medium_term', accessToken);
-        const tracksList = document.getElementById('tracks');
-        tracksData.items.forEach((track, idx) => {
-          const artists = track.artists.map(a => a.name).join(', ');
-          const li = document.createElement('li');
-          li.textContent = `${idx + 1}. ${track.name} by ${artists}`;
-          tracksList.appendChild(li);
-        });
         // Fetch playlists
         const playlistsData = await fetchSpotify('me/playlists?limit=10', accessToken);
         const playlistsList = document.getElementById('playlists');
         playlistsData.items.forEach((playlist, idx) => {
           const li = document.createElement('li');
           li.innerHTML = `${idx + 1}. <a href="${playlist.external_urls.spotify}" target="_blank">${playlist.name}</a> ` +
-            `<button onclick="navigator.clipboard.writeText('${playlist.external_urls.spotify}')">Share</button>`;
+            `<button onclick="navigator.clipboard.writeText('${playlist.external_urls.spotify}')">Share</button> ` +
+            `<button onclick="editPlaylist('${playlist.id}', '${playlist.name.replace(/'/g, "&#39;")}')">Edit</button>`;
           playlistsList.appendChild(li);
         });
       } else {
         console.log('No access token, showing login button.'); // Debug
       }
     };
+
+    // Playlist editing logic
+    function editPlaylist(playlistId, currentName) {
+      const newName = prompt('Enter new playlist name:', currentName);
+      if (newName && newName !== currentName) {
+        const token = localStorage.getItem('spotify_access_token');
+        fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name: newName })
+        }).then(res => {
+          if (res.ok) {
+            alert('Playlist renamed! Reloading...');
+            location.reload();
+          } else {
+            alert('Failed to rename playlist.');
+          }
+        });
+      }
+    }
   </script>
 </body>
 </html>
