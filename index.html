@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Spotify Top Tracks & Artists</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    h2 { color: #1DB954; }
+    ul { list-style-type: none; padding: 0; }
+    li { margin-bottom: 0.5em; }
+    .login-btn { background: #1DB954; color: white; padding: 10px 20px; border: none; border-radius: 20px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h2>Spotify Top Tracks</h2>
+  <button class="login-btn" id="login-btn">Login with Spotify</button>
+  <ul id="tracks"></ul>
+  <h2>Spotify Top Artists</h2>
+  <ul id="artists"></ul>
+
+  <script>
+    const clientId = '62fe71b84f0442dbbe8f79a7c8a7150f'; // Replace with your client ID
+    const redirectUri = window.location.origin + window.location.pathname;
+    const scopes = 'user-top-read';
+
+    document.getElementById('login-btn').onclick = function() {
+      const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}`;
+      window.location = authUrl;
+    };
+
+    function getHashParams() {
+      const hash = window.location.hash.substring(1);
+      return Object.fromEntries(new URLSearchParams(hash));
+    }
+
+    async function fetchSpotify(endpoint, token) {
+      const res = await fetch(`https://api.spotify.com/v1/${endpoint}`, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      return res.json();
+    }
+
+    window.onload = async function() {
+      const params = getHashParams();
+      if (params.access_token) {
+        document.getElementById('login-btn').style.display = 'none';
+
+        // Fetch top tracks
+        const tracksData = await fetchSpotify('me/top/tracks?limit=10&time_range=medium_term', params.access_token);
+        const tracksList = document.getElementById('tracks');
+        tracksData.items.forEach((track, idx) => {
+          const artists = track.artists.map(a => a.name).join(', ');
+          const li = document.createElement('li');
+          li.textContent = `${idx + 1}. ${track.name} by ${artists}`;
+          tracksList.appendChild(li);
+        });
+
+        // Fetch top artists
+        const artistsData = await fetchSpotify('me/top/artists?limit=5&time_range=medium_term', params.access_token);
+        const artistsList = document.getElementById('artists');
+        artistsData.items.forEach((artist, idx) => {
+          const genres = artist.genres.length ? artist.genres.join(', ') : 'No genres available';
+          const li = document.createElement('li');
+          li.textContent = `${idx + 1}. ${artist.name}: ${genres}`;
+          artistsList.appendChild(li);
+        });
+      }
+    };
+  </script>
+</body>
+</html>
