@@ -145,8 +145,10 @@
           body: JSON.stringify({ name: newName })
         }).then(res => {
           if (res.ok) {
-            alert('Playlist renamed! Reloading...');
-            location.reload();
+            // Update the playlist name in the DOM without reloading
+            const link = document.querySelector(`a[href*='/playlist/${playlistId}']`);
+            if (link) link.textContent = newName;
+            alert('Playlist renamed!');
           } else {
             alert('Failed to rename playlist.');
           }
