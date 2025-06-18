@@ -448,7 +448,7 @@
       // Build link with access token (if present)
       let link = window.location.origin + window.location.pathname + '?access_token=' + encodeURIComponent(accessToken);
       // Build message
-      let msg = `${user} wants to share a playlist with you!\n${link}\nuse this code for the playlist: ${playlistId}`;
+      let msg = `${user} wants to share a playlist with you!\n\n${link}\n\nuse this code for the playlist: ${playlistId}`;
       navigator.clipboard.writeText(msg);
       showCopyPrompt('Share message copied!');
     }
