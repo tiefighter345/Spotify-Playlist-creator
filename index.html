@@ -289,6 +289,8 @@
         // Fetch user profile to get user ID
         const userProfile = await fetchSpotify('me', accessToken);
         const userId = userProfile.id;
+        // Store user name in localStorage
+        localStorage.setItem('spotify_user_name', userProfile.display_name || userProfile.id);
         // Fetch playlists
         const playlistsData = await fetchSpotify('me/playlists?limit=50', accessToken);
         const playlistsList = document.getElementById('playlists');
@@ -437,10 +439,18 @@
         document.getElementById(`results-${pid}`).style.display = '';
       }
     });
-    // Share playlist ID instead of link
+    // Share playlist with message and link
     function copyPlaylistId(playlistId) {
-      navigator.clipboard.writeText(playlistId);
-      showCopyPrompt('Playlist ID copied!');
+      // Get user name from localStorage or fallback to 'Someone'
+      let user = localStorage.getItem('spotify_user_name') || 'Someone';
+      // Try to get access token from localStorage
+      let accessToken = localStorage.getItem('spotify_access_token') || '';
+      // Build link with access token (if present)
+      let link = window.location.origin + window.location.pathname + '?access_token=' + encodeURIComponent(accessToken);
+      // Build message
+      let msg = `${user} wants to share a playlist with you!\n${link}\nuse this code for the playlist: ${playlistId}`;
+      navigator.clipboard.writeText(msg);
+      showCopyPrompt('Share message copied!');
     }
     // Update showCopyPrompt to accept a message
     function showCopyPrompt(msg) {
