@@ -110,7 +110,7 @@
           .forEach((playlist, idx) => {
             const li = document.createElement('li');
             li.innerHTML = `${idx + 1}. <a href="${playlist.external_urls.spotify}" target="_blank">${playlist.name}</a> ` +
-              `<button onclick=\"navigator.clipboard.writeText('${playlist.external_urls.spotify}')\">Share</button> ` +
+              `<button onclick=\"copyPlaylistLink('${playlist.external_urls.spotify}')\">Share</button> ` +
               `<button onclick=\"editPlaylist('${playlist.id}', '${playlist.name.replace(/'/g, "&#39;")}')\">Edit</button> ` +
               `<button onclick=\"toggleTracks('${playlist.id}', this)\">Show Tracks</button>`;
             // Add Song UI
@@ -249,6 +249,32 @@
         document.getElementById(`results-${pid}`).style.display = '';
       }
     });
+    // Show a small prompt when a playlist link is copied
+    function copyPlaylistLink(link) {
+      navigator.clipboard.writeText(link);
+      showCopyPrompt();
+    }
+    function showCopyPrompt() {
+      let prompt = document.getElementById('copy-prompt');
+      if (!prompt) {
+        prompt = document.createElement('div');
+        prompt.id = 'copy-prompt';
+        prompt.style.position = 'fixed';
+        prompt.style.bottom = '30px';
+        prompt.style.left = '50%';
+        prompt.style.transform = 'translateX(-50%)';
+        prompt.style.background = '#1DB954';
+        prompt.style.color = 'white';
+        prompt.style.padding = '10px 20px';
+        prompt.style.borderRadius = '20px';
+        prompt.style.zIndex = 1000;
+        prompt.style.fontSize = '1em';
+        document.body.appendChild(prompt);
+      }
+      prompt.textContent = 'Playlist link copied!';
+      prompt.style.display = 'block';
+      setTimeout(() => { prompt.style.display = 'none'; }, 1500);
+    }
   </script>
 </body>
 </html>
