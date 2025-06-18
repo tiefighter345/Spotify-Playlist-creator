@@ -116,7 +116,7 @@
             // Add Song UI
             const addDiv = document.createElement('div');
             addDiv.id = `addsongui-${playlist.id}`;
-            addDiv.innerHTML = `<input type='text' placeholder='Search for a song...' id='search-${playlist.id}' style='margin-top:5px;'> <button onclick=\"searchAndShowTracks('${playlist.id}')\">Search</button><ul id='results-${playlist.id}'></ul><button id='showsearch-${playlist.id}' style='display:none;margin-top:5px;' onclick=\"showSearchUI('${playlist.id}')\">Add another song</button>`;
+            addDiv.innerHTML = `<input type='text' placeholder='Search for a song...' id='search-${playlist.id}' style='margin-top:5px;'> <button onclick=\"searchAndShowTracks('${playlist.id}')\">Search</button><ul id='results-${playlist.id}'></ul>`;
             li.appendChild(addDiv);
             const tracksUl = document.createElement('ul');
             tracksUl.id = `tracks-${playlist.id}`;
@@ -229,24 +229,15 @@
       });
       if (res.ok) {
         alert('Track added!');
-        // Hide/clear search UI and show 'Add another song' button
+        // Just clear the search box and results, but keep them visible
         document.getElementById(`search-${playlistId}`).value = '';
         document.getElementById(`results-${playlistId}`).innerHTML = '';
-        document.getElementById(`results-${playlistId}`).style.display = 'none';
-        document.getElementById(`search-${playlistId}`).style.display = 'none';
-        document.getElementById(`showsearch-${playlistId}`).style.display = '';
         // Optionally refresh tracks if visible
         const btn = document.querySelector(`button[onclick*=\\"toggleTracks('${playlistId}'\\"]`);
         if (btn && btn.textContent === 'Hide Tracks') toggleTracks(playlistId, btn);
       } else {
         alert('Failed to add track.');
       }
-    }
-    // Show search UI again when user clicks 'Add another song'
-    function showSearchUI(playlistId) {
-      document.getElementById(`search-${playlistId}`).style.display = '';
-      document.getElementById(`results-${playlistId}`).style.display = '';
-      document.getElementById(`showsearch-${playlistId}`).style.display = 'none';
     }
     // Show search UI again when user types
     document.addEventListener('input', function(e) {
