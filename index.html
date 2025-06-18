@@ -99,22 +99,27 @@
       // Optionally, you can store the access token in localStorage for later use
       if (accessToken) {
         document.getElementById('login-btn').style.display = 'none';
+        // Fetch user profile to get user ID
+        const userProfile = await fetchSpotify('me', accessToken);
+        const userId = userProfile.id;
         // Fetch playlists
-        const playlistsData = await fetchSpotify('me/playlists?limit=10', accessToken);
+        const playlistsData = await fetchSpotify('me/playlists?limit=50', accessToken);
         const playlistsList = document.getElementById('playlists');
-        playlistsData.items.forEach((playlist, idx) => {
-          const li = document.createElement('li');
-          li.innerHTML = `${idx + 1}. <a href="${playlist.external_urls.spotify}" target="_blank">${playlist.name}</a> ` +
-            `<button onclick=\"navigator.clipboard.writeText('${playlist.external_urls.spotify}')\">Share</button> ` +
-            `<button onclick=\"editPlaylist('${playlist.id}', '${playlist.name.replace(/'/g, "&#39;")}')\">Edit</button> ` +
-            `<button onclick=\"toggleTracks('${playlist.id}', this)\">Show Tracks</button> ` +
-            `<button onclick=\"addTrackPrompt('${playlist.id}')\">Add Song</button>`;
-          const tracksUl = document.createElement('ul');
-          tracksUl.id = `tracks-${playlist.id}`;
-          tracksUl.style.display = 'none';
-          li.appendChild(tracksUl);
-          playlistsList.appendChild(li);
-        });
+        playlistsData.items
+          .filter(playlist => playlist.owner && playlist.owner.id === userId)
+          .forEach((playlist, idx) => {
+            const li = document.createElement('li');
+            li.innerHTML = `${idx + 1}. <a href="${playlist.external_urls.spotify}" target="_blank">${playlist.name}</a> ` +
+              `<button onclick=\"navigator.clipboard.writeText('${playlist.external_urls.spotify}')\">Share</button> ` +
+              `<button onclick=\"editPlaylist('${playlist.id}', '${playlist.name.replace(/'/g, "&#39;")}')\">Edit</button> ` +
+              `<button onclick=\"toggleTracks('${playlist.id}', this)\">Show Tracks</button> ` +
+              `<button onclick=\"addTrackPrompt('${playlist.id}')\">Add Song</button>`;
+            const tracksUl = document.createElement('ul');
+            tracksUl.id = `tracks-${playlist.id}`;
+            tracksUl.style.display = 'none';
+            li.appendChild(tracksUl);
+            playlistsList.appendChild(li);
+          });
         // Store access token for later use
         localStorage.setItem('spotify_access_token', accessToken);
       } else {
