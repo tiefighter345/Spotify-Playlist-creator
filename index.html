@@ -15,6 +15,7 @@
       color: #1DB954;
       margin-top: 2em;
       letter-spacing: 1px;
+      text-align: center;
     }
     .login-btn {
       background: #1DB954;
@@ -31,12 +32,19 @@
     .login-btn:hover {
       background: #17a74a;
     }
+    .playlist-id-editor {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 2em;
+      gap: 8px;
+    }
     #custom-playlist-id {
       border-radius: 20px;
       border: none;
       padding: 10px 16px;
       font-size: 1em;
-      margin-right: 8px;
+      margin-right: 0;
       outline: none;
       box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     }
@@ -170,8 +178,8 @@
   </style>
 </head>
 <body>
-    <div style="margin-bottom: 2em;">
-      <input type="text" id="custom-playlist-id" placeholder="Enter Spotify Playlist ID" style="padding:5px;">
+    <div class="playlist-id-editor">
+      <input type="text" id="custom-playlist-id" placeholder="Enter Spotify Playlist ID">
       <button id="load-playlist-btn">Load Playlist</button>
     </div>
     <button class="login-btn" id="login-btn">Login with Spotify</button>
