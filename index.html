@@ -443,10 +443,8 @@
     function copyPlaylistId(playlistId) {
       // Get user name from localStorage or fallback to 'Someone'
       let user = localStorage.getItem('spotify_user_name') || 'Someone';
-      // Try to get access token from localStorage
-      let accessToken = localStorage.getItem('spotify_access_token') || '';
-      // Build link with access token (if present)
-      let link = window.location.origin + window.location.pathname + '?access_token=' + encodeURIComponent(accessToken);
+      // Build link without access token
+      let link = window.location.origin + window.location.pathname;
       // Build message
       let msg = `${user} wants to share a playlist with you!\n\n${link}\n\nuse this code for the playlist: ${playlistId}`;
       navigator.clipboard.writeText(msg);
