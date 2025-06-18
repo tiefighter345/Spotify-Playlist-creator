@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-// Use dynamic import for node-fetch v3 compatibility
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const fetch = require('node-fetch');
 const app = express();
 app.use(cors());
 app.use(express.json());
