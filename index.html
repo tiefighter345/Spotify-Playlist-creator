@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Spotify Top Tracks & Artists</title>
+  <title>Spotify Top Tracks & Playlists</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 2em; }
     h2 { color: #1DB954; }
@@ -15,13 +15,13 @@
   <button class="login-btn" id="login-btn">Login with Spotify</button>
   <h2>Spotify Top Tracks</h2>
   <ul id="tracks"></ul>
-  <h2>Spotify Top Artists</h2>
-  <ul id="artists"></ul>
+  <h2>Your Spotify Playlists</h2>
+  <ul id="playlists"></ul>
 
   <script>
     const clientId = '62fe71b84f0442dbbe8f79a7c8a7150f';
     const redirectUri = 'https://tiefighter345.github.io/Spotify-Playlist-creator/index.html';
-    const scopes = 'user-top-read';
+    const scopes = 'playlist-read-private';
 
     // PKCE helpers
     function generateCodeVerifier(length = 128) {
@@ -100,11 +100,9 @@
       }
       // Optionally, you can store the access token in localStorage for later use
       if (accessToken) {
-        console.log('Access token set, hiding login button and fetching data.'); // Debug
         document.getElementById('login-btn').style.display = 'none';
         // Fetch top tracks
         const tracksData = await fetchSpotify('me/top/tracks?limit=10&time_range=medium_term', accessToken);
-        console.log('Tracks data:', tracksData); // Debug
         const tracksList = document.getElementById('tracks');
         tracksData.items.forEach((track, idx) => {
           const artists = track.artists.map(a => a.name).join(', ');
@@ -112,15 +110,14 @@
           li.textContent = `${idx + 1}. ${track.name} by ${artists}`;
           tracksList.appendChild(li);
         });
-        // Fetch top artists
-        const artistsData = await fetchSpotify('me/top/artists?limit=5&time_range=medium_term', accessToken);
-        console.log('Artists data:', artistsData); // Debug
-        const artistsList = document.getElementById('artists');
-        artistsData.items.forEach((artist, idx) => {
-          const genres = artist.genres.length ? artist.genres.join(', ') : 'No genres available';
+        // Fetch playlists
+        const playlistsData = await fetchSpotify('me/playlists?limit=10', accessToken);
+        const playlistsList = document.getElementById('playlists');
+        playlistsData.items.forEach((playlist, idx) => {
           const li = document.createElement('li');
-          li.textContent = `${idx + 1}. ${artist.name}: ${genres}`;
-          artistsList.appendChild(li);
+          li.innerHTML = `${idx + 1}. <a href="${playlist.external_urls.spotify}" target="_blank">${playlist.name}</a> ` +
+            `<button onclick="navigator.clipboard.writeText('${playlist.external_urls.spotify}')">Share</button>`;
+          playlistsList.appendChild(li);
         });
       } else {
         console.log('No access token, showing login button.'); // Debug
