@@ -83,19 +83,28 @@
     window.onload = async function() {
       const params = getQueryParams();
       let accessToken = null;
+      console.log('Query params:', params); // Debug
       if (params.code) {
+        console.log('Found code in URL:', params.code); // Debug
         // Exchange code for access token
         const tokenData = await exchangeToken(params.code);
+        console.log('Token exchange response:', tokenData); // Debug
         if (tokenData.access_token) {
           accessToken = tokenData.access_token;
           window.history.replaceState({}, document.title, redirectUri); // Clean URL
+        } else {
+          console.error('No access token received:', tokenData); // Debug
         }
+      } else {
+        console.log('No code in URL.'); // Debug
       }
       // Optionally, you can store the access token in localStorage for later use
       if (accessToken) {
+        console.log('Access token set, hiding login button and fetching data.'); // Debug
         document.getElementById('login-btn').style.display = 'none';
         // Fetch top tracks
         const tracksData = await fetchSpotify('me/top/tracks?limit=10&time_range=medium_term', accessToken);
+        console.log('Tracks data:', tracksData); // Debug
         const tracksList = document.getElementById('tracks');
         tracksData.items.forEach((track, idx) => {
           const artists = track.artists.map(a => a.name).join(', ');
@@ -105,6 +114,7 @@
         });
         // Fetch top artists
         const artistsData = await fetchSpotify('me/top/artists?limit=5&time_range=medium_term', accessToken);
+        console.log('Artists data:', artistsData); // Debug
         const artistsList = document.getElementById('artists');
         artistsData.items.forEach((artist, idx) => {
           const genres = artist.genres.length ? artist.genres.join(', ') : 'No genres available';
@@ -112,6 +122,8 @@
           li.textContent = `${idx + 1}. ${artist.name}: ${genres}`;
           artistsList.appendChild(li);
         });
+      } else {
+        console.log('No access token, showing login button.'); // Debug
       }
     };
   </script>
