@@ -228,6 +228,11 @@
       });
       if (res.ok) {
         alert('Track added!');
+        // Hide/clear search UI
+        document.getElementById(`search-${playlistId}`).value = '';
+        document.getElementById(`results-${playlistId}`).innerHTML = '';
+        document.getElementById(`results-${playlistId}`).style.display = 'none';
+        document.getElementById(`search-${playlistId}`).style.display = 'none';
         // Optionally refresh tracks if visible
         const btn = document.querySelector(`button[onclick*=\\"toggleTracks('${playlistId}'\\"]`);
         if (btn && btn.textContent === 'Hide Tracks') toggleTracks(playlistId, btn);
@@ -235,6 +240,14 @@
         alert('Failed to add track.');
       }
     }
+    // Show search UI again when user types
+    document.addEventListener('input', function(e) {
+      if (e.target && e.target.id && e.target.id.startsWith('search-')) {
+        e.target.style.display = '';
+        const pid = e.target.id.replace('search-', '');
+        document.getElementById(`results-${pid}`).style.display = '';
+      }
+    });
   </script>
 </body>
 </html>
