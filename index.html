@@ -12,9 +12,13 @@
   </style>
 </head>
 <body>
-  <button class="login-btn" id="login-btn">Login with Spotify</button>
-  <h2>Your Spotify Playlists</h2>
-  <ul id="playlists"></ul>
+    <div style="margin-bottom: 2em;">
+      <input type="text" id="custom-playlist-id" placeholder="Enter Spotify Playlist ID" style="padding:5px;">
+      <button id="load-playlist-btn">Load Playlist</button>
+    </div>
+    <button class="login-btn" id="login-btn">Login with Spotify</button>
+    <h2>Your Spotify Playlists</h2>
+    <ul id="playlists"></ul>
 
   <script>
     const clientId = '62fe71b84f0442dbbe8f79a7c8a7150f';
@@ -109,8 +113,9 @@
           .filter(playlist => playlist.owner && playlist.owner.id === userId)
           .forEach((playlist, idx) => {
             const li = document.createElement('li');
+            // In playlist list, update Share button to copy ID
             li.innerHTML = `${idx + 1}. <a href="${playlist.external_urls.spotify}" target="_blank">${playlist.name}</a> ` +
-              `<button onclick=\"copyPlaylistLink('${playlist.external_urls.spotify}')\">Share</button> ` +
+              `<button onclick=\"copyPlaylistId('${playlist.id}')\">Share</button> ` +
               `<button onclick=\"editPlaylist('${playlist.id}', '${playlist.name.replace(/'/g, "&#39;")}')\">Edit</button> ` +
               `<button onclick=\"toggleTracks('${playlist.id}', this)\">Show Tracks</button>`;
             // Add Song UI
@@ -249,12 +254,13 @@
         document.getElementById(`results-${pid}`).style.display = '';
       }
     });
-    // Show a small prompt when a playlist link is copied
-    function copyPlaylistLink(link) {
-      navigator.clipboard.writeText(link);
-      showCopyPrompt();
+    // Share playlist ID instead of link
+    function copyPlaylistId(playlistId) {
+      navigator.clipboard.writeText(playlistId);
+      showCopyPrompt('Playlist ID copied!');
     }
-    function showCopyPrompt() {
+    // Update showCopyPrompt to accept a message
+    function showCopyPrompt(msg) {
       let prompt = document.getElementById('copy-prompt');
       if (!prompt) {
         prompt = document.createElement('div');
@@ -271,10 +277,43 @@
         prompt.style.fontSize = '1em';
         document.body.appendChild(prompt);
       }
-      prompt.textContent = 'Playlist link copied!';
+      prompt.textContent = msg || 'Copied!';
       prompt.style.display = 'block';
       setTimeout(() => { prompt.style.display = 'none'; }, 1500);
     }
+
+    document.getElementById('load-playlist-btn').onclick = async function() {
+      const playlistId = document.getElementById('custom-playlist-id').value.trim();
+      if (!playlistId) return;
+      const token = localStorage.getItem('spotify_access_token');
+      if (!token) { alert('Please log in first.'); return; }
+      // Clear current playlists
+      document.getElementById('playlists').innerHTML = '';
+      // Fetch and display the playlist
+      const playlist = await fetchSpotify(`playlists/${playlistId}`, token);
+      if (!playlist || playlist.error) {
+        alert('Could not load playlist.');
+        return;
+      }
+      // Build UI for this playlist only
+      const playlistsList = document.getElementById('playlists');
+      const li = document.createElement('li');
+      li.innerHTML = `<a href="${playlist.external_urls.spotify}" target="_blank">${playlist.name}</a> ` +
+        `<button onclick=\"copyPlaylistId('${playlist.id}')\">Share</button> ` +
+        `<button onclick=\"editPlaylist('${playlist.id}', '${playlist.name.replace(/'/g, "&#39;")}')\">Edit</button> ` +
+        `<button onclick=\"toggleTracks('${playlist.id}', this)\">Show Tracks</button>`;
+      // Add Song UI
+      const addDiv = document.createElement('div');
+      addDiv.id = `addsongui-${playlist.id}`;
+      addDiv.innerHTML = `<input type='text' placeholder='Search for a song...' id='search-${playlist.id}' style='margin-top:5px;'> <button onclick=\"searchAndShowTracks('${playlist.id}')\">Search</button><ul id='results-${playlist.id}'></ul>`;
+      li.appendChild(addDiv);
+      // Tracks list
+      const tracksUl = document.createElement('ul');
+      tracksUl.id = `tracks-${playlist.id}`;
+      tracksUl.style.display = 'none';
+      li.appendChild(tracksUl);
+      playlistsList.appendChild(li);
+    };
   </script>
 </body>
 </html>
