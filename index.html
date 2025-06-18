@@ -151,10 +151,18 @@
         btn.textContent = 'Hide Tracks';
         ul.innerHTML = '<li>Loading...</li>';
         const token = localStorage.getItem('spotify_access_token');
-        const data = await fetchSpotify(`playlists/${playlistId}/tracks?limit=50`, token);
+        let allTracks = [];
+        let nextUrl = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100`;
+        while (nextUrl) {
+          const res = await fetch(nextUrl, { headers: { 'Authorization': 'Bearer ' + token } });
+          const data = await res.json();
+          allTracks = allTracks.concat(data.items);
+          nextUrl = data.next;
+        }
         ul.innerHTML = '';
-        data.items.forEach(item => {
+        allTracks.forEach(item => {
           const track = item.track;
+          if (!track) return;
           const trackLi = document.createElement('li');
           trackLi.innerHTML = `${track.name} by ${track.artists.map(a => a.name).join(', ')} ` +
             `<button onclick=\"removeTrack('${playlistId}', '${track.uri}')\">Remove</button>`;
