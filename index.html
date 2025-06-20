@@ -269,6 +269,10 @@
     window.onload = async function() {
       const params = getQueryParams();
       let accessToken = null;
+      // Check if access token is already stored
+      if (!params.code) {
+        accessToken = localStorage.getItem('spotify_access_token');
+      }
       console.log('Query params:', params); // Debug
       if (params.code) {
         console.log('Found code in URL:', params.code); // Debug
