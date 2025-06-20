@@ -197,6 +197,9 @@
       <div class="playlist-id-editor">
         <input type="text" id="custom-playlist-id" placeholder="Enter Spotify Playlist ID">
         <button id="load-playlist-btn">Load Playlist</button>
+        <label style="margin-left:10px;">
+          <input type="checkbox" id="guest-mode-toggle"> Modify as Guest
+        </label>
       </div>
       <button class="login-btn" id="login-btn">Login with Spotify</button>
       <h2>Your Spotify Playlists</h2>
@@ -208,6 +211,8 @@
     const clientId = '62fe71b84f0442dbbe8f79a7c8a7150f';
     const redirectUri = 'https://tiefighter345.github.io/Spotify-Playlist-creator/index.html';
     const scopes = 'playlist-read-private playlist-modify-public playlist-modify-private';
+    // Website's Spotify account access token (replace with your real token!)
+    const WEBSITE_SPOTIFY_TOKEN = "BQCRCgSFnLUqoPCMbl4VOs2LwjdVgIFSA_xzMguTfQn51OBfaDv4wPbhosoPynLuum971lC95aSalRYCvLnUo_7lJzc38G7YvhmrC7RUXDoDc-AUyBT3yJjRiQyls_9XIWGmUdshY20vvfIaXKfMuj_fcMVlnSt4-GrxzWPY9CDxoiwiMjlbK2R9cdyy0iMCOMOvUZqbeMBLawE-NpdEGJCDNSMW-i78YezRyGlGwXoJidLccW-5migKXp-z3fMk-Zeha5B4VF9DgdrI_AsD1nF5PQ2VBrwuWQ7kUXl5ralyhSyj8T1E8g";
 
     // PKCE helpers
     function generateCodeVerifier(length = 128) {
@@ -334,7 +339,7 @@
     function editPlaylist(playlistId, currentName) {
       const newName = prompt('Enter new playlist name:', currentName);
       if (newName && newName !== currentName) {
-        const token = localStorage.getItem('spotify_access_token');
+        const token = getActiveToken();
         fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
           method: 'PUT',
           headers: {
@@ -344,7 +349,6 @@
           body: JSON.stringify({ name: newName })
         }).then(res => {
           if (res.ok) {
-            // Update the playlist name in the DOM without reloading
             const link = document.querySelector(`a[href*='/playlist/${playlistId}']`);
             if (link) link.textContent = newName;
             alert('Playlist renamed!');
@@ -360,7 +364,7 @@
       if (ul.style.display === 'none') {
         btn.textContent = 'Hide Tracks';
         ul.innerHTML = '<li>Loading...</li>';
-        const token = localStorage.getItem('spotify_access_token');
+        const token = getActiveToken();
         let allTracks = [];
         let nextUrl = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100`;
         while (nextUrl) {
@@ -386,7 +390,7 @@
     }
     // Remove a track from a playlist
     function removeTrack(playlistId, trackUri) {
-      const token = localStorage.getItem('spotify_access_token');
+      const token = getActiveToken();
       fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
         method: 'DELETE',
         headers: {
@@ -407,7 +411,7 @@
     async function searchAndShowTracks(playlistId) {
       const query = document.getElementById(`search-${playlistId}`).value;
       if (!query) return;
-      const token = localStorage.getItem('spotify_access_token');
+      const token = getActiveToken();
       const search = await fetchSpotify(`search?q=${encodeURIComponent(query)}&type=track&limit=5`, token);
       const resultsUl = document.getElementById(`results-${playlistId}`);
       resultsUl.innerHTML = '';
@@ -419,7 +423,7 @@
     }
     // Add a track to a playlist (from search results)
     async function addTrackToPlaylist(playlistId, trackUri) {
-      const token = localStorage.getItem('spotify_access_token');
+      const token = getActiveToken();
       const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
         method: 'POST',
         headers: {
@@ -430,10 +434,8 @@
       });
       if (res.ok) {
         alert('Track added!');
-        // Just clear the search box and results, but keep them visible
         document.getElementById(`search-${playlistId}`).value = '';
         document.getElementById(`results-${playlistId}`).innerHTML = '';
-        // Optionally refresh tracks if visible
         const btn = document.querySelector(`button[onclick*=\\"toggleTracks('${playlistId}'\\"]`);
         if (btn && btn.textContent === 'Hide Tracks') toggleTracks(playlistId, btn);
       } else {
@@ -485,8 +487,14 @@
     document.getElementById('load-playlist-btn').onclick = async function() {
       const playlistId = document.getElementById('custom-playlist-id').value.trim();
       if (!playlistId) return;
-      const token = localStorage.getItem('spotify_access_token');
-      if (!token) { alert('Please log in first.'); return; }
+      // Use guest token if guest mode is checked, otherwise use user's token
+      let token;
+      if (document.getElementById('guest-mode-toggle').checked) {
+        token = WEBSITE_SPOTIFY_TOKEN;
+      } else {
+        token = localStorage.getItem('spotify_access_token');
+        if (!token) { alert('Please log in first.'); return; }
+      }
       // Clear current playlists
       document.getElementById('playlists').innerHTML = '';
       // Fetch and display the playlist
