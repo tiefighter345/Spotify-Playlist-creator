@@ -201,6 +201,7 @@
       <button class="login-btn" id="login-btn">Login with Spotify</button>
       <h2>Your Spotify Playlists</h2>
       <ul id="playlists"></ul>
+      <button class="login-btn" id="signout-btn" style="margin-top:1em; display:none;">Sign Out</button>
     </div>
 
   <script>
@@ -286,6 +287,7 @@
       // Optionally, you can store the access token in localStorage for later use
       if (accessToken) {
         document.getElementById('login-btn').style.display = 'none';
+        document.getElementById('signout-btn').style.display = 'block';
         // Fetch user profile to get user ID
         const userProfile = await fetchSpotify('me', accessToken);
         const userId = userProfile.id;
@@ -317,6 +319,7 @@
         // Store access token for later use
         localStorage.setItem('spotify_access_token', accessToken);
       } else {
+        document.getElementById('signout-btn').style.display = 'none';
         console.log('No access token, showing login button.'); // Debug
       }
     };
@@ -504,6 +507,13 @@
       tracksUl.style.display = 'none';
       li.appendChild(tracksUl);
       playlistsList.appendChild(li);
+    };
+
+    document.getElementById('signout-btn').onclick = function() {
+      localStorage.removeItem('spotify_access_token');
+      localStorage.removeItem('spotify_user_name');
+      localStorage.removeItem('spotify_code_verifier');
+      location.reload();
     };
   </script>
 </body>
