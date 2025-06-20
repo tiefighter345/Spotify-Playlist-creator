@@ -315,7 +315,7 @@
             li.innerHTML = `${idx + 1}. <a href="${playlist.external_urls.spotify}" target="_blank">${playlist.name}</a> ` +
               `<button onclick=\"copyPlaylistId('${playlist.id}')\">Share</button> ` +
               `<button onclick=\"editPlaylist('${playlist.id}', '${playlist.name.replace(/'/g, "&#39;")}')\">Edit</button> ` +
-              `<button onclick=\"toggleTracks('${playlist.id}', this)\">Show Tracks</button>`;
+              `<button class='show-tracks-btn' data-playlist-id='${playlist.id}'>Show Tracks</button>`;
             // Add Song UI
             const addDiv = document.createElement('div');
             addDiv.id = `addsongui-${playlist.id}`;
@@ -326,6 +326,13 @@
             tracksUl.style.display = 'none';
             li.appendChild(tracksUl);
             playlistsList.appendChild(li);
+            // Attach event listener for Show Tracks button (fixes inline handler issue)
+            setTimeout(() => {
+              const showBtn = li.querySelector('.show-tracks-btn');
+              if (showBtn) {
+                showBtn.onclick = function() { toggleTracks(playlist.id, showBtn); };
+              }
+            }, 0);
           });
         // Store access token for later use
         localStorage.setItem('spotify_access_token', accessToken);
@@ -334,6 +341,13 @@
         console.log('No access token, showing login button.'); // Debug
       }
     };
+
+    // Helper to get the correct token (user or website)
+    function getActiveToken() {
+      return document.getElementById('guest-mode-toggle') && document.getElementById('guest-mode-toggle').checked
+        ? WEBSITE_SPOTIFY_TOKEN
+        : localStorage.getItem('spotify_access_token');
+    }
 
     // Playlist editing logic
     function editPlaylist(playlistId, currentName) {
@@ -509,7 +523,7 @@
       li.innerHTML = `<a href="${playlist.external_urls.spotify}" target="_blank">${playlist.name}</a> ` +
         `<button onclick=\"copyPlaylistId('${playlist.id}')\">Share</button> ` +
         `<button onclick=\"editPlaylist('${playlist.id}', '${playlist.name.replace(/'/g, "&#39;")}')\">Edit</button> ` +
-        `<button onclick=\"toggleTracks('${playlist.id}', this)\">Show Tracks</button>`;
+        `<button class='show-tracks-btn' data-playlist-id='${playlist.id}'>Show Tracks</button>`;
       // Add Song UI
       const addDiv = document.createElement('div');
       addDiv.id = `addsongui-${playlist.id}`;
@@ -521,6 +535,13 @@
       tracksUl.style.display = 'none';
       li.appendChild(tracksUl);
       playlistsList.appendChild(li);
+      // Attach event listener for Show Tracks button (fixes inline handler issue)
+      setTimeout(() => {
+        const showBtn = li.querySelector('.show-tracks-btn');
+        if (showBtn) {
+          showBtn.onclick = function() { toggleTracks(playlist.id, showBtn); };
+        }
+      }, 0);
     };
 
     document.getElementById('signout-btn').onclick = function() {
